@@ -40,3 +40,16 @@ Proiectul este organizat modular pentru a asigura claritatea si rulabilitatea co
 ├── outputs/            # Randari live din timpul antrenarii
 ├── README.md           # Documentatie clara si completa
 └── requirements.txt    # Dependente Python (PyTorch, OpenCV, etc.)
+```
+
+## 6. Instalare si Utilizare
+1. Cloneaza repository-ul: `git clone <link-repo>`
+2. Creeaza mediul virtual: `python -m venv venv`
+3. Activeaza mediul: `.\venv\Scripts\activate` (Windows)
+4. Instaleaza dependintele: `pip install -r requirements.txt`
+5. Ruleaza notebook-ul din `src/01_Exploration.ipynb` pentru vizualizarea datelor.
+
+## 7. Status Curent (Saptamana 4)
+- [x] Dataset configurat si validat 2D/3D.
+- [x] Arhitectura MLP implementata in `models/nerf_mlp.py`.
+- [x] Script de incarcare date finalizat in `src/data_loader.py`.
