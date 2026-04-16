@@ -1,25 +1,24 @@
 # DeepScene 360: Neural Radiance Fields (NeRF) for Multi-Object Scene Synthesis
 
 ## 1. Definirea Problemei și a Obiectivului
-[cite_start]Proiectul vizează implementarea și optimizarea unei rețele neuronale de tip **Neural Radiance Fields (NeRF)** pentru reconstrucția unei scene volumetrice complexe din imagini 2D[cite: 5]. [cite_start]Obiectivul central este **Sinteza de Vederi Noi (Novel View Synthesis)** — generarea de imagini fotorealiste din unghiuri neprevăzute în setul de antrenare, demonstrând capacitatea modelului de a învăța geometria implicită și ocluziile[cite: 12, 14].
-
+Proiectul vizează implementarea și optimizarea unei rețele neuronale de tip **Neural Radiance Fields (NeRF)** pentru reconstrucția unei scene volumetrice complexe din imagini 2D. Obiectivul central este **Sinteza de Vederi Noi (Novel View Synthesis)** — generarea de imagini fotorealiste din unghiuri neprevăzute în setul de antrenare, demonstrând capacitatea modelului de a învăța geometria implicită și ocluziile.
 ## 2. Descriere Dataset
-[cite_start]Se utilizează setul de date academic **"NeRF Synthetic Dataset" (Blender)**, cu accent pe scena **Lego**[cite: 5, 40].
-* [cite_start]**Rezoluție**: Imaginile originale de 800x800 au fost scalate la **400x400 pixeli** pentru a reduce consumul de memorie video (VRAM) cu 75%[cite: 41].
-* [cite_start]**Metadate**: Include parametrii intrinseci și matricile de rotație/translație (Camera-to-World) extrase din fișierele `.json`[cite: 42].
-* [cite_start]**Protocol**: Split riguros Train / Validation / Test pentru monitorizarea precisă a performanței[cite: 77].
+Se utilizează setul de date academic **"NeRF Synthetic Dataset" (Blender)**, cu accent pe scena **Lego**.
+* **Rezoluție**: Imaginile originale de 800x800 au fost scalate la **400x400 pixeli** pentru a reduce consumul de memorie video (VRAM) cu 75%.
+* **Metadate**: Include parametrii intrinseci și matricile de rotație/translație (Camera-to-World) extrase din fișierele `.json`.
+* **Protocol**: Split riguros Train / Validation / Test pentru monitorizarea precisă a performanței.
 
 ## 3. Abordare Propusă (Arhitectură și Matematică)
-[cite_start]Modelul este un **Multi-Layer Perceptron (MLP)** profund care aproximează o funcție continuă 5D: $F_{\Theta}:(x,d)\rightarrow(c,\sigma)$[cite: 19, 20].
+Modelul este un **Multi-Layer Perceptron (MLP)** profund care aproximează o funcție continuă 5D: $F_{\Theta}:(x,d)\rightarrow(c,\sigma)$.
 
 ### Decizii Tehnice și Hiperparametri:
-* [cite_start]**Positional Encoding**: Proiectarea coordonatelor în frecvențe înalte pentru a captura detaliile fine ale texturii[cite: 6].
-* [cite_start]**Eșantionare Ierarhică**: Utilizarea a $N_c=64$ eșantioane *Coarse* și $N_f=128$ eșantioane *Fine* pentru a optimiza randarea volumelor goale[cite: 45].
-* [cite_start]**Optimizator**: Adam cu rată de învățare inițială $5\times10^{-4}$ și decădere exponențială[cite: 48].
-* [cite_start]**Center Cropping**: Strategie aplicată în primele 500 de iterații pentru a forța convergența pe obiectul central[cite: 43].
+* **Positional Encoding**: Proiectarea coordonatelor în frecvențe înalte pentru a captura detaliile fine ale texturii.
+* **Eșantionare Ierarhică**: Utilizarea a $N_c=64$ eșantioane *Coarse* și $N_f=128$ eșantioane *Fine* pentru a optimiza randarea volumelor goale.
+* **Optimizator**: Adam cu rată de învățare inițială $5\times10^{-4}$ și decădere exponențială.
+* **Center Cropping**: Strategie aplicată în primele 500 de iterații pentru a forța convergența pe obiectul central.
 
 ## 4. Rezultate și Performanță (Benchmark)
-[cite_start]Performanța a fost evaluată pe parcursul a **150.000 de iterații**, obținând un nivel de fotorealism în care artefactele sunt imperceptibile[cite: 7, 80]:
+Performanța a fost evaluată pe parcursul a **150.000 de iterații**, obținând un nivel de fotorealism în care artefactele sunt imperceptibile:
 
 | Iterație (k) | PSNR (dB) | SSIM |
 | :--- | :--- | :--- |
@@ -28,17 +27,15 @@
 | 100 | 31.39 | 0.9652 |
 | **150 (Final)** | **32.02** | **0.9695** |
 
-[cite_start][cite: 79]
-
-[cite_start]**Compararea cu Baseline-ul Academic**: Implementarea curentă a reținut peste **98%** din performanța modelului original (32.54 dB), reprezentând un compromis eficient între resurse și calitate[cite: 65, 66].
+**Compararea cu Baseline-ul Academic**: Implementarea curentă a reținut peste **98%** din performanța modelului original (32.54 dB), reprezentând un compromis eficient între resurse și calitate.
 
 ## 5. Probleme Întâmpinate și Soluții
-* [cite_start]**Instabilitatea Mediului (Timeouts)**: S-a implementat un mecanism de **Micro-Checkpointing** la fiecare 10.000 de iterații, salvând starea optimizatorului pentru a permite reluarea antrenării în caz de deconectare[cite: 55, 56].
-* [cite_start]**Anomalii în Hărțile de Adâncime**: Erorile de tip "NaN" au fost eliminate prin neutralizare matematică (`nan_to_num`) și limitare statistică (clipping) între percentilele 1% și 99%[cite: 60].
+* **Instabilitatea Mediului (Timeouts)**: S-a implementat un mecanism de **Micro-Checkpointing** la fiecare 10.000 de iterații, salvând starea optimizatorului pentru a permite reluarea antrenării în caz de deconectare.
+* **Anomalii în Hărțile de Adâncime**: Erorile de tip "NaN" au fost eliminate prin neutralizare matematică (`nan_to_num`) și limitare statistică (clipping) între percentilele 1% și 99%.
 
 ## 6. Structură Repository
 Repository-ul este organizat pentru a suporta multiple configurații de scene:
-```text
+```
 ├── configs/            # Fișiere de configurare (lego.txt, chair.txt, etc.)
 ├── imgs/               # Resurse vizuale și diagrame de pipeline
 ├── load_*.py           # Scripturi dedicate pentru diferite tipuri de date (Blender, LLFF)
@@ -46,6 +43,7 @@ Repository-ul este organizat pentru a suporta multiple configurații de scene:
 ├── run_nerf_helpers.py # Funcții auxiliare, arhitectura MLP și encodări
 ├── requirements.txt    # Dependențe (PyTorch, NumPy, OpenCV)
 └── README.md           # Documentația tehnică curentă
+```
 
 ## 7. Instalare și Utilizare
 Proiectul necesită un mediu Python 3.8+ și suport CUDA pentru performanță optimă.
